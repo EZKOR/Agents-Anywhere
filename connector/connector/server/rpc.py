@@ -9,6 +9,7 @@ from typing import Any, Protocol
 
 from connector.logging import logger
 from connector.runtime_protocol import RuntimeProtocolError
+from connector.security.secret_scrubber import scrub_outbound
 
 ConnectorDispatcher = Callable[[str, dict[str, Any]], Awaitable[Any]]
 
@@ -283,6 +284,7 @@ class ConnectorRpcChannel:
         payload: dict[str, Any],
         max_frame_bytes: int | None = None,
     ) -> None:
+        payload = scrub_outbound(payload)
         queue = self._send_queue
         if self._ws is None or queue is None:
             raise RuntimeError("backend websocket is not connected")
